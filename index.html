@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ThrowDodge</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <audio id="bgm" loop src="bgm.mp3"></audio>
+    <div id="game-container">
+        <div id="ui-container">
+            <div id="player1-score" class="score">P1: 0</div>
+            <div id="round-score">0 : 0</div>
+            <div id="player2-score" class="score">P2: 0</div>
+        </div>
+        <canvas id="gameCanvas"></canvas>
+        <div id="message-box" class="message"></div>
+        <div id="timer" class="timer"></div>
+    </div>
+    <script src="game.js"></script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+body {
+    margin: 0;
+    background-color: #000;
+    color: #fff;
+    font-family: 'Courier New', Courier, monospace;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+}
+
+#game-container {
+    position: relative;
+    border: 3px solid #0ff;
+    box-shadow: 0 0 20px #0ff, inset 0 0 20px #0ff;
+}
+
+canvas {
+    display: block;
+    background-color: transparent; /* Make canvas transparent to see background effects */
+}
+
+#ui-container {
+    position: absolute;
+    top: 15px;
+    left: 20px;
+    right: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    pointer-events: none;
+}
+
+.score {
+    font-size: 24px;
+    font-weight: bold;
+    text-shadow: 0 0 5px #fff, 0 0 10px #0ff;
+}
+
+#round-score {
+    font-size: 48px;
+    font-weight: bold;
+    color: #ff00ff;
+    text-shadow: 0 0 8px #ff00ff, 0 0 15px #ff00ff;
+    flex-grow: 1;
+    text-align: center;
+}
+
+.message {
+    font-size: 40px;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 0 10px #f0f, 0 0 20px #f0f;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    pointer-events: none;
+}
+
+.timer {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 28px;
+    color: #ff0;
+    text-shadow: 0 0 5px #ff0, 0 0 10px #ff0;
+    pointer-events: none;
+}
