@@ -58,7 +58,9 @@ class Player {
         this.canHop = true;
         this.hasShield = false;
         this.hasTripleShot = false;
-        this.hasCurveShot = false;
+        this.hasDash = false;
+        this.hasSizeUp = false;
+        this.hasSpeedDown = false;
     }
 
     draw() {
@@ -136,8 +138,8 @@ class Player {
 }
 
 class Projectile {
-    constructor(x, y, velX, velY, color, curve = 0) {
-        this.x = x; this.y = y; this.size = PROJECTILE_SIZE;
+    constructor(x, y, velX, velY, color, size = PROJECTILE_SIZE, curve = 0) {
+        this.x = x; this.y = y; this.size = size;
         this.velocityX = velX; this.velocityY = velY;
         this.color = color; this.curve = curve;
     }
@@ -196,11 +198,11 @@ const itemColors = {
     shield: '#ffffff', booster: '#ffff00', jump_boost: '#00ff00',
     triple_shot: '#ff00ff', curve_shot: '#ff9900', heavy_gravity: '#6600cc'
 };
-const defenderItems = ['shield', 'booster', 'jump_boost'];
-const attackerItems = ['triple_shot', 'curve_shot', 'heavy_gravity'];
+const defenderItems = ['shield', 'booster', 'dash'];
+const attackerItems = ['triple_shot', 'size_up', 'speed_down'];
 const itemDisplayNames = {
-    shield: '실드!', booster: '스피드 업!', jump_boost: '점프 강화!',
-    triple_shot: '트리플샷!', curve_shot: '커브샷!', heavy_gravity: '중력 증가!'
+    shield: '실드!', booster: '스피드 업!', dash: '대쉬!',
+    triple_shot: '트리플샷!', size_up: '사이즈업!', speed_down: '상대 이속 다운!'
 };
 
 class Item {
@@ -251,7 +253,7 @@ let player1, player2, projectiles = [], items = [], particles = [], notification
 let round = 1, player1RoundsWon = 0, player2RoundsWon = 0;
 let currentAttacker, currentDefender;
 let roundTimer, roundTimerId, itemSpawnIntervalId;
-let roundDuration = 30, defenderHits = 0;
+let roundDuration = 20, defenderHits = 0;
 let canThrow = true, gameState = 'STARTING';
 
 // --- Main Game Loop ---
@@ -333,16 +335,16 @@ function createProjectile(attacker, horizontalInfluence) {
     const speed = 24;
     const velY = speed;
     const velX = horizontalInfluence * 3;
+    const projectileSize = attacker.hasSizeUp ? PROJECTILE_SIZE * 1.5 : PROJECTILE_SIZE;
 
     if (attacker.hasTripleShot) {
         for (let i = -1; i <= 1; i++) {
-            projectiles.push(new Projectile(attacker.x + attacker.width / 2, attacker.y + attacker.height, (i * 2) + velX, velY, attacker.color));
+            projectiles.push(new Projectile(attacker.x + attacker.width / 2, attacker.y + attacker.height, (i * 4) + velX, velY, attacker.color, projectileSize));
         }
         attacker.hasTripleShot = false;
     } else {
-        const curve = attacker.hasCurveShot ? (Math.random() - 0.5) * 0.2 : 0;
-        projectiles.push(new Projectile(attacker.x + attacker.width / 2, attacker.y + attacker.height, velX, velY, attacker.color, curve));
-        attacker.hasCurveShot = false;
+        projectiles.push(new Projectile(attacker.x + attacker.width / 2, attacker.y + attacker.height, velX, velY, attacker.color, projectileSize));
+        attacker.hasSizeUp = false;
     }
 }
 
@@ -365,15 +367,17 @@ function activateItem(player, type) {
             player.speed = player.baseSpeed * 1.5;
             setTimeout(() => { player.speed = player.baseSpeed; }, BUFF_DURATION);
             break;
-        case 'jump_boost':
-            player.jumpStrength = player.baseJump * 1.3;
-            setTimeout(() => { player.jumpStrength = player.baseJump; }, BUFF_DURATION);
+        case 'dash':
+            player.speed = player.baseSpeed * 2; // Dash speed
+            setTimeout(() => { player.speed = player.baseSpeed; }, BUFF_DURATION / 2); // Shorter duration for dash
             break;
         case 'triple_shot': player.hasTripleShot = true; break;
-        case 'curve_shot': player.hasCurveShot = true; break;
-        case 'heavy_gravity':
-            gravity = BASE_GRAVITY * 2;
-            setTimeout(() => { gravity = BASE_GRAVITY; }, BUFF_DURATION);
+        case 'size_up': player.hasSizeUp = true; break;
+        case 'speed_down':
+            // Find the opponent and reduce their speed
+            const opponent = (player.name === 'Player 1') ? player2 : player1;
+            opponent.speed = opponent.baseSpeed * 0.5;
+            setTimeout(() => { opponent.speed = opponent.baseSpeed; }, BUFF_DURATION);
             break;
     }
 }
@@ -435,7 +439,7 @@ function startNextRound() {
     }
     player1 = p1; player2 = p2;
     
-    messageBox.textContent = `${currentAttacker.name} 공격!`;
+    messageBox.textContent = currentAttacker.name === 'Player 1' ? '왼쪽 공격!' : '오른쪽 공격!';
 
     setTimeout(() => {
         messageBox.textContent = '';
@@ -461,7 +465,8 @@ function endRound(winnerName) {
     gameState = 'ROUND_OVER';
     clearInterval(roundTimerId);
     clearInterval(itemSpawnIntervalId);
-    messageBox.textContent = `${winnerName} 라운드 승리!`;
+    const displayWinnerName = winnerName === 'Player 1' ? '왼쪽' : '오른쪽';
+    messageBox.textContent = `${displayWinnerName} 라운드 승리!`;
 
     if (winnerName === 'Player 1') player1RoundsWon++;
     else player2RoundsWon++;
